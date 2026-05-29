@@ -233,6 +233,7 @@ const TagBadge = ({ label, value, bg }: { label: string, value: string, bg: stri
 );
 
 import tawaReYilPresetData from '../../assets/presets/tawa_re_yil.json';
+import tawaDeltaPresetData from '../../assets/presets/tawa_delta_combined.json';
 
 const PINYIN_TRANSLATIONS: Record<string, string> = {
   jixie: "Cơ Khí",
@@ -361,6 +362,8 @@ const scanPresetsForCustomTagDefinitions = (): Record<string, string> => {
     // Fallback to builtin template if active preset wasn't found in savedList
     if (!activePresetConfig && activeId === "builtin_tawa_re_yil") {
       activePresetConfig = tawaReYilPresetData;
+    } else if (!activePresetConfig && activeId === "builtin_tawa_delta") {
+      activePresetConfig = tawaDeltaPresetData;
     }
 
     if (activePresetConfig && activePresetConfig.modules) {
@@ -449,77 +452,6 @@ const formatTagName = (tagName: string): { label: string; baseName: string; pref
 const getCustomTagRenderer = (tagName: string) => {
   return ({ _node, children, ...restProps }: any) => {
     const sanitized = sanitizeProps(restProps);
-    const tagNameLower = tagName.toLowerCase();
-    
-    // 1. Resolve label, baseName, and prefix
-    const { label: defaultLabel, baseName, prefix } = formatTagName(tagNameLower);
-    
-    // 2. See if there is a preset-specific definition scanned from prompt
-    const definitions = getCustomTagDefinitions();
-    let label = definitions[tagNameLower] || defaultLabel;
-    
-    // If the scanned definition contains long explanation, format it nicely
-    if (prefix && definitions[baseName] && !definitions[tagNameLower]) {
-      label = `${prefix} ${definitions[baseName]}`;
-    }
-
-    // 3. Choose theme dynamically based on baseName
-    let themeClasses = "text-stone-700 dark:text-stone-300 bg-stone-100/40 dark:bg-stone-800/10 border-stone-200 dark:border-stone-700/50";
-    let icon = "🏷️";
-
-    // Matching built-in optimal themes
-    if (baseName.includes("jixie") || baseName.includes("mechanic") || baseName.includes("cyber") || baseName.includes("tech")) {
-      themeClasses = THEMES[0].classes;
-      icon = THEMES[0].icon;
-    } else if (baseName.includes("shenghua") || baseName.includes("bio") || baseName.includes("toxic")) {
-      themeClasses = THEMES[1].classes;
-      icon = THEMES[1].icon;
-    } else if (baseName.includes("shenhua") || baseName.includes("myth") || baseName.includes("magic") || baseName.includes("god")) {
-      themeClasses = THEMES[2].classes;
-      icon = THEMES[2].icon;
-    } else if (baseName.includes("faqing") || baseName.includes("lust") || baseName.includes("arousal") || baseName.includes("sexual")) {
-      themeClasses = THEMES[3].classes;
-      icon = THEMES[3].icon;
-    } else if (baseName.includes("chongfu") || baseName.includes("repeat") || baseName.includes("loop")) {
-      themeClasses = THEMES[4].classes;
-      icon = THEMES[4].icon;
-    } else if (baseName.includes("juewang") || baseName.includes("despair") || baseName.includes("danger") || baseName.includes("death")) {
-      themeClasses = THEMES[5].classes;
-      icon = THEMES[5].icon;
-    } else if (baseName.includes("bagu") || baseName.includes("cliche") || baseName.includes("dogma")) {
-      themeClasses = THEMES[6].classes;
-      icon = THEMES[6].icon;
-    } else if (baseName.includes("tawa")) {
-      themeClasses = THEMES[7].classes;
-      icon = THEMES[7].icon;
-    } else if (baseName.includes("xunhuan") || baseName.includes("cycle") || baseName.includes("time") || baseName.includes("reincarnation")) {
-      themeClasses = THEMES[8].classes;
-      icon = THEMES[8].icon;
-    } else if (baseName.includes("shouhua") || baseName.includes("beast")) {
-      themeClasses = THEMES[9].classes;
-      icon = THEMES[9].icon;
-    } else if (baseName.includes("tonghua") || baseName.includes("assimilation")) {
-      themeClasses = THEMES[10].classes;
-      icon = THEMES[10].icon;
-    } else if (baseName.includes("fuzong") || baseName.includes("obey") || baseName.includes("submiss")) {
-      themeClasses = THEMES[11].classes;
-      icon = THEMES[11].icon;
-    } else {
-      // Fallback deterministic theme by hashing baseName
-      let hash = 0;
-      for (let i = 0; i < baseName.length; i++) {
-        hash = baseName.charCodeAt(i) + ((hash << 5) - hash);
-      }
-      const idx = Math.abs(hash) % THEMES.length;
-      themeClasses = THEMES[idx].classes;
-      icon = THEMES[idx].icon;
-      
-      // If we have an unrecognized prefix (like 仿/DS), use the emoji icon accordingly
-      if (prefix === "仿") {
-        icon = "🎭";
-      }
-    }
-
     const textContent = extractText(children);
     const isMultiLine = textContent.includes('\n') || textContent.length > 120;
 
@@ -527,16 +459,10 @@ const getCustomTagRenderer = (tagName: string) => {
       return (
         <div 
           data-custom-tag={tagName} 
-          className={`my-4 relative pl-4 border-l-4 rounded-r-lg py-3 px-4 shadow-sm transition-all duration-300 hover:shadow-md ${themeClasses}`} 
+          className="my-2 whitespace-pre-wrap text-[15px] leading-relaxed text-stone-800 dark:text-stone-100" 
           {...sanitized}
         >
-          <div className="absolute top-2 right-3 font-mono text-[9px] font-bold uppercase tracking-wider opacity-65 flex items-center gap-1 select-none">
-            <span>{icon}</span>
-            <span>{label}</span>
-          </div>
-          <div className="text-sm leading-relaxed whitespace-pre-wrap pt-2 pr-12">
-            {children}
-          </div>
+          {children}
         </div>
       );
     }
@@ -544,11 +470,10 @@ const getCustomTagRenderer = (tagName: string) => {
     return (
       <span 
         data-custom-tag={tagName} 
-        className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded border text-xs font-semibold whitespace-nowrap mx-0.5 align-middle ${themeClasses}`}
+        className="inline text-[15px] leading-relaxed text-stone-800 dark:text-stone-100"
         {...sanitized}
       >
-        <span className="text-[10px] opacity-75">{icon}</span>
-        <span className="font-mali leading-none">{children}</span>
+        {children}
       </span>
     );
   };

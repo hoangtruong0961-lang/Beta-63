@@ -143,8 +143,10 @@ const StoryBibleSidebar: React.FC<StoryBibleSidebarProps> = ({ worldData }) => {
     worldData.id ||
     `campaign-${worldData.world?.worldName?.replace(/\s+/g, "")}-${worldData.player?.name?.replace(/\s+/g, "")}`;
 
-  const loadEntries = async () => {
-    setIsLoading(true);
+  const loadEntries = async (isSilent = false) => {
+    if (!isSilent) {
+      setIsLoading(true);
+    }
     try {
       const allVectors = await dbService.getAllVectors();
       const storyBibleVectors = allVectors.filter(
@@ -158,17 +160,19 @@ const StoryBibleSidebar: React.FC<StoryBibleSidebarProps> = ({ worldData }) => {
     } catch (e) {
       console.error("Failed to load StoryBible entries", e);
     } finally {
-      setIsLoading(false);
+      if (!isSilent) {
+        setIsLoading(false);
+      }
     }
   };
 
   useEffect(() => {
     let intervalId: ReturnType<typeof setInterval>;
     if (isOpen) {
-      loadEntries();
+      loadEntries(false);
       // Thêm auto-refresh mỗi 5s để cập nhật ngay nếu background service đang trích xuất
       intervalId = setInterval(() => {
-        loadEntries();
+        loadEntries(true);
       }, 5000);
     }
     return () => clearInterval(intervalId);
@@ -833,7 +837,7 @@ const StoryBibleSidebar: React.FC<StoryBibleSidebarProps> = ({ worldData }) => {
                       {/* List Sidebar (Shown ONLY in Focus Mode when selecting or adding an entry) */}
                       <div className={`shrink-0 flex-col bg-[#020617] border-r border-slate-850/50 transition-all duration-300 ${
                         (selectedEntryId || isAdding) 
-                          ? "w-full lg:w-[35%] xl:w-[33%] flex h-full" 
+                          ? "hidden lg:flex lg:w-[35%] xl:w-[33%] h-full" 
                           : "hidden"
                       }`}>
                         <EntryListView

@@ -27,6 +27,7 @@ import { toast } from "sonner";
 import { dbService } from "../../../../services/db/indexedDB";
 
 import tawaReYilPresetData from "../../../../assets/presets/tawa_re_yil.json";
+import tawaDeltaPresetData from "../../../../assets/presets/tawa_delta_combined.json";
 
 interface TawaPresetManagerProps {
   onConfigChange: (config: TawaPresetConfig) => void;
@@ -208,6 +209,7 @@ function parseBuiltinPreset(id: string, name: string, data: any): SavedPreset {
 
 const BUILTIN_PRESETS: SavedPreset[] = [
   parseBuiltinPreset("builtin_tawa_re_yil", "Tawa Re = YIL丨Alpha V1", tawaReYilPresetData),
+  parseBuiltinPreset("builtin_tawa_delta", "Tawa Delta Combined丨Mới Nhất", tawaDeltaPresetData),
 ];
 
 export default function TawaPresetManager({

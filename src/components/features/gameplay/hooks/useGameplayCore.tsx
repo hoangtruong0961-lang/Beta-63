@@ -428,6 +428,21 @@ export const useGameplayCore = ({
             }
           } catch(e) {}
         }
+
+        let hasTawaDeltaPreset = fullPresets.some((p: any) => p.id === "builtin_tawa_delta" || p.name === "Tawa Delta Combined" || p.name === "Tawa Delta Combined丨Mới Nhất");
+        if (!hasTawaDeltaPreset) {
+          try {
+            const tawaDeltaData = await import('../../../../assets/presets/tawa_delta_combined.json');
+            if (tawaDeltaData) {
+               fullPresets.push({
+                 id: "builtin_tawa_delta",
+                 name: "Tawa Delta Combined丨Mới Nhất",
+                 prompts: tawaDeltaData.prompts || tawaDeltaData.modules || [],
+                 extensions: tawaDeltaData.extensions || {}
+               });
+            }
+          } catch(e) {}
+        }
         tavernHelperCache.presets = fullPresets;
 
         const dbWbs = await tavoApi.lorebook.all();
